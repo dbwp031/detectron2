@@ -452,42 +452,42 @@ class RPN(nn.Module):
         new_features = []
         
         # print(len(features))
-        # for f, ratio in zip(self.in_features,self.compress_ratio):
-        #     h,w = features[f].shape[-2:]
-        #     if ratio == 1:
-        #         up_sample = features[f]
-        #     else:
-        #         down_sample = torch.nn.functional.interpolate(features[f], (int(h//ratio), int(w//ratio)),mode='bilinear')
-        #         up_sample = torch.nn.functional.interpolate(down_sample, (int(h),int(w)),mode='bilinear')
-        #     new_features.append(up_sample)
-        # features = new_features
+        for f, ratio in zip(self.in_features,self.compress_ratio):
+            h,w = features[f].shape[-2:]
+            if ratio == 1:
+                up_sample = features[f]
+            else:
+                down_sample = torch.nn.functional.interpolate(features[f], (int(h//ratio), int(w//ratio)),mode='bilinear')
+                up_sample = torch.nn.functional.interpolate(down_sample, (int(h),int(w)),mode='bilinear')
+            new_features.append(up_sample)
+        features = new_features
 
-        # p3, p5
-        p3 = features['p3']
-        p5 = features['p5']
-        # p2
-        h,w = p3.shape[-2:]
-        p2 = torch.nn.functional.interpolate(p3, (int(h*2), int(w*2)),mode='bilinear')
-        # p6
-        h,w = p5.shape[-2:]
-        p6 = torch.nn.functional.interpolate(p5, (int(h//2), int(w//2)),mode='bilinear')
+#         # p3, p5
+#         p3 = features['p3']
+#         p5 = features['p5']
+#         # p2
+#         h,w = p3.shape[-2:]
+#         p2 = torch.nn.functional.interpolate(p3, (int(h*2), int(w*2)),mode='bilinear')
+#         # p6
+#         h,w = p5.shape[-2:]
+#         p6 = torch.nn.functional.interpolate(p5, (int(h//2), int(w//2)),mode='bilinear')
 
-        # # p4-1 (p3 사용)
-        # h,w = p3.shape[-2:]
-        # p4 = torch.nn.functional.interpolate(p3, (int(h//2), int(w//2)),mode='bilinear')
+#         # # p4-1 (p3 사용)
+#         # h,w = p3.shape[-2:]
+#         # p4 = torch.nn.functional.interpolate(p3, (int(h//2), int(w//2)),mode='bilinear')
         
-        # # p4-2 (p5 사용)
-        # h,w = p3.shape[-2:]
-        # p4 = torch.nn.functional.interpolate(p5, (int(h*2), int(w*2)),mode='bilinear')
+#         # # p4-2 (p5 사용)
+#         # h,w = p3.shape[-2:]
+#         # p4 = torch.nn.functional.interpolate(p5, (int(h*2), int(w*2)),mode='bilinear')
         
-        # p4-3 (p3,p5 사용)
-        h,w = p5.shape[-2:]
-        p5_up = torch.nn.functional.interpolate(p5, (int(h*2), int(w*2)),mode='bilinear')
-        h,w = p3.shape[-2:]
-        p3_down = torch.nn.functional.interpolate(p3, (int(h//2), int(w//2)),mode='bilinear')
-        p4 = p5_up*self.compress_ratio[0]+p3_down*self.compress_ratio[1]
+#         # p4-3 (p3,p5 사용)
+#         h,w = p5.shape[-2:]
+#         p5_up = torch.nn.functional.interpolate(p5, (int(h*2), int(w*2)),mode='bilinear')
+#         h,w = p3.shape[-2:]
+#         p3_down = torch.nn.functional.interpolate(p3, (int(h//2), int(w//2)),mode='bilinear')
+#         p4 = p5_up*self.compress_ratio[0]+p3_down*self.compress_ratio[1]
         
-        features = [p2,p3,p4,p5,p6]
+#         features = [p2,p3,p4,p5,p6]
         
         anchors = self.anchor_generator(features)
         
