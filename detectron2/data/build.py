@@ -536,7 +536,7 @@ def build_detection_test_loader(
             sampler = InferenceSampler(len(dataset))
     return torchdata.DataLoader(
         dataset,
-        batch_size=batch_size,
+        batch_size=1,
         sampler=sampler,
         drop_last=False,
         num_workers=num_workers,
