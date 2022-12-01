@@ -140,6 +140,12 @@ For python-based LazyConfig, use "path.key=value".
         default=None,
         nargs=argparse.REMAINDER,
     )
+    parser.add_argument(
+        '--cr',
+        nargs='+',
+        type=float
+        
+    )
     return parser
 
 
