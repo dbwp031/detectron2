@@ -37,6 +37,7 @@ from detectron2.evaluation import (
     verify_results,
 )
 from detectron2.modeling import GeneralizedRCNNWithTTA
+from detectron2 import model_zoo
 
 
 def build_evaluator(cfg, dataset_name, output_folder=None):
@@ -115,13 +116,17 @@ def setup(args):
     """
     cfg = get_cfg()
     cfg.merge_from_file(args.config_file)
+    cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Detection/faster_rcnn_X_101_32x8d_FPN_3x.yaml")
+    
     cfg.merge_from_list(args.opts)
     cfg.freeze()
     default_setup(cfg, args)
     return cfg
 
-
+import torch
+import json
 def main(args):
+    torch.set_num_threads(2)
     cfg = setup(args)
 
     if args.eval_only:
@@ -129,11 +134,22 @@ def main(args):
         DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
             cfg.MODEL.WEIGHTS, resume=args.resume
         )
+        
+        model.proposal_generator.compress_ratio = args.cr
+        print('='*50)
+        print(model.proposal_generator.in_features)
         res = Trainer.test(cfg, model)
         if cfg.TEST.AUG.ENABLED:
             res.update(Trainer.test_with_TTA(cfg, model))
         if comm.is_main_process():
             verify_results(cfg, res)
+            # expn = f"2-{args.cr[0]}_3-{args.cr[1]}_4-{args.cr[2]}-5_{args.cr[3]}-6_{args.cr[4]}"
+            result = [vars(args),res]
+            expn = f"final_p4-3_p3_{args.cr[0]}-p5_{args.cr[1]}-mix"
+            with open(f'/root/workspace/test_d/output/cr_output/{expn}.json', 'w') as outfile:
+                # json.dump(vars(args),outfile,indent=4)
+                # json.dump(res,outfile, indent=4)
+                json.dump(result,outfile, indent=4)
         return res
 
     """
